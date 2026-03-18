@@ -1,14 +1,26 @@
-// db\models\user.ts
 import mongoose from 'mongoose'
+
+const PaymentMethodSchema = new mongoose.Schema(
+  {
+    bank: { type: String, default: '' },
+    cardNumber: { type: String, default: '' },
+    expiry: { type: String, default: '' },
+    cvc: { type: String, default: '' },
+    address: { type: String, default: '' },
+  },
+  { _id: false }
+)
 
 const UserSchema = new mongoose.Schema(
   {
-    email: { type: String, default: '' },
-    nickname: { type: String, default: '' },
+    userId: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true },
+    passwordHash: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, unique: true, trim: true },
+    paymentMethod: { type: PaymentMethodSchema, default: () => ({}) },
     profile_image_url: { type: String, default: '' },
-    user_type: { type: String, default: '' },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
+    user_type: { type: String, default: 'user' },
   },
   {
     timestamps: true,
