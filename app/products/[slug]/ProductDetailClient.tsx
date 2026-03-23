@@ -85,7 +85,7 @@ const makePurchaseOptions = (product: Product): InquiryItem[] => {
 }
 
 export default function ProductDetailClient({ product, recommendedProducts }: Props) {
-  const { recordActivity } = useSession()
+  const { recordActivity, sellerProfile } = useSession()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<TabKey>('details')
   const [detailsExpanded, setDetailsExpanded] = useState(false)
@@ -651,6 +651,31 @@ export default function ProductDetailClient({ product, recommendedProducts }: Pr
             ))}
           </div>
         </section>
+
+        {sellerProfile && (
+          <section className="rounded-[2rem] border border-[#e1d3c2] bg-[linear-gradient(180deg,_rgba(255,253,250,0.98),_rgba(244,236,227,0.96))] p-5 shadow-[0_22px_60px_rgba(72,54,29,0.07)] sm:p-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[#8d6846]">Seller Information</p>
+            <div className="mt-4 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+              <div className="rounded-[1.5rem] bg-[#2f241d] p-5 text-[#f8f1e7]">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#d8c0a0]">Company</p>
+                <h2 className="mt-3 text-3xl font-black">{sellerProfile.companyName}</h2>
+                <p className="mt-4 text-sm leading-7 text-[#f3e6d6]">
+                  {sellerProfile.description || '등록된 판매자 소개가 아직 없습니다.'}
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-[#eadfce] bg-white/80 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b08a60]">Company Address</p>
+                  <p className="mt-4 text-sm leading-7 text-[#5f4d3d]">{sellerProfile.companyAddress}</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-[#eadfce] bg-white/80 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b08a60]">Contact Number</p>
+                  <p className="mt-4 text-sm leading-7 text-[#5f4d3d]">{sellerProfile.contactNumber}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </main>
   )

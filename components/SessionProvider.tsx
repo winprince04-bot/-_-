@@ -34,6 +34,13 @@ export type OrderItem = {
   address: string
 }
 
+export type SellerProfile = {
+  companyName: string
+  companyAddress: string
+  contactNumber: string
+  description: string
+}
+
 type SessionContextValue = {
   currentUser: RegisteredUser | null
   registeredUsers: RegisteredUser[]
@@ -41,11 +48,13 @@ type SessionContextValue = {
   currentUserPaymentMethods: PaymentMethod[]
   orders: OrderItem[]
   currentUserOrders: OrderItem[]
+  sellerProfile: SellerProfile | null
   sessionNotice: string
   login: (identifier: string, password: string) => boolean
   logout: () => void
   registerUser: (user: RegisteredUser) => void
   savePaymentMethod: (method: Omit<PaymentMethod, 'ownerUserId'>) => void
+  saveSellerProfile: (profile: SellerProfile) => void
   updateCurrentUserProfile: (updates: Partial<RegisteredUser>) => void
   updateCurrentUserPayment: (updates: Partial<Omit<PaymentMethod, 'ownerUserId'>>) => void
   recordActivity: (activity: 'cart' | 'purchase') => void
@@ -64,7 +73,7 @@ const createMockOrders = (ownerUserId: string): OrderItem[] =>
     amount: product.salePrice,
     quantity: (index % 2) + 1,
     paymentMethod: index % 2 === 0 ? '신한은행 / 1234' : '카카오뱅크 / 4321',
-    address: '서울특별시 성북구 안암로 145',
+    address: '서울 성북구 인촌로 145',
   }))
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
@@ -72,6 +81,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [orders, setOrders] = useState<OrderItem[]>([])
+  const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null)
   const [lastActivityAt, setLastActivityAt] = useState<number | null>(null)
   const [sessionNotice, setSessionNotice] = useState('')
 
@@ -113,6 +123,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       currentUserPaymentMethods,
       orders,
       currentUserOrders,
+      sellerProfile,
       sessionNotice,
       login: (identifier, password) => {
         const matchedUser = registeredUsers.find(
@@ -120,7 +131,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         )
 
         if (!matchedUser) {
-          setSessionNotice('아이디, 이메일 또는 비밀번호를 다시 확인해 주세요.')
+          setSessionNotice('아이디 또는 이메일과 비밀번호를 다시 확인해 주세요.')
           return false
         }
 
@@ -139,7 +150,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       registerUser: (user) => {
         setRegisteredUsers((current) => [...current, user])
         setOrders((current) => [...current, ...createMockOrders(user.userId)])
-        setSessionNotice('휴대폰 인증이 완료되어 회원가입이 완료되었습니다.')
+        setSessionNotice('본인인증이 완료되어 회원가입이 완료되었습니다.')
       },
       savePaymentMethod: (method) => {
         if (!currentUser) {
@@ -149,6 +160,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setPaymentMethods((current) => [...current, { ...method, ownerUserId: currentUser.userId }])
         setSessionNotice('결제수단과 주소가 등록되었습니다.')
+      },
+      saveSellerProfile: (profile) => {
+        setSellerProfile(profile)
+        setSessionNotice('판매자 정보가 등록되었습니다.')
       },
       updateCurrentUserProfile: (updates) => {
         if (!currentUser) return
@@ -199,7 +214,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setSessionNotice(activity === 'cart' ? '장바구니 활동이 기록되었습니다.' : '구매 활동이 기록되었습니다.')
       },
     }),
-    [currentUser, currentUserOrders, currentUserPaymentMethods, orders, paymentMethods, registeredUsers, sessionNotice]
+    [
+      currentUser,
+      currentUserOrders,
+      currentUserPaymentMethods,
+      orders,
+      paymentMethods,
+      registeredUsers,
+      sellerProfile,
+      sessionNotice,
+    ]
   )
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>

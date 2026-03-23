@@ -238,6 +238,16 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        <Link
+          href="/seller"
+          className="fixed bottom-8 right-8 z-30 flex items-center gap-3 rounded-full bg-[#2f241d] px-5 py-4 text-sm font-bold text-[#f8f1e7] shadow-[0_18px_45px_rgba(60,41,16,0.28)] transition hover:-translate-y-1 hover:bg-[#47362b]"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-xl font-light">
+            +
+          </span>
+          판매자 전용
+        </Link>
       </div>
     </main>
   )
