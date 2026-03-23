@@ -14,8 +14,10 @@ const initialForm = {
 }
 
 export default function SellerPage() {
-  const { sellerProfile, saveSellerProfile } = useSession()
+  const { currentUser, sellerProfile, saveSellerProfile } = useSession()
   const [showForm, setShowForm] = useState(!sellerProfile)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
   const [form, setForm] = useState({
     companyName: sellerProfile?.companyName ?? initialForm.companyName,
     companyAddress: sellerProfile?.companyAddress ?? initialForm.companyAddress,
@@ -23,17 +25,56 @@ export default function SellerPage() {
     description: sellerProfile?.description ?? initialForm.description,
   })
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!form.companyName.trim() || !form.companyAddress.trim() || !form.contactNumber.trim()) return
 
-    saveSellerProfile({
-      companyName: form.companyName.trim(),
-      companyAddress: form.companyAddress.trim(),
-      contactNumber: form.contactNumber.trim(),
-      description: form.description.trim(),
-    })
-    setShowForm(false)
+    if (!form.companyName.trim() || !form.companyAddress.trim() || !form.contactNumber.trim()) {
+      setSaveMessage('회사명, 회사 주소, 문의 번호를 먼저 입력해 주세요.')
+      return
+    }
+
+    if (!currentUser) {
+      setSaveMessage('로그인 후 판매자 정보를 저장할 수 있습니다.')
+      return
+    }
+
+    setIsSaving(true)
+    setSaveMessage('')
+
+    try {
+      const response = await fetch('/api/seller/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.userId,
+          companyName: form.companyName.trim(),
+          companyAddress: form.companyAddress.trim(),
+          contactNumber: form.contactNumber.trim(),
+          description: form.description.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setSaveMessage(data.message ?? '판매자 정보 저장에 실패했습니다.')
+        return
+      }
+
+      saveSellerProfile({
+        companyName: data.sellerProfile?.companyName ?? form.companyName.trim(),
+        companyAddress: data.sellerProfile?.companyAddress ?? form.companyAddress.trim(),
+        contactNumber: data.sellerProfile?.contactNumber ?? form.contactNumber.trim(),
+        description: data.sellerProfile?.description ?? form.description.trim(),
+      })
+
+      setSaveMessage(data.message ?? '판매자 정보가 저장되었습니다.')
+      setShowForm(false)
+    } catch {
+      setSaveMessage('판매자 정보 저장 중 오류가 발생했습니다.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -107,12 +148,15 @@ export default function SellerPage() {
               />
               <button
                 type="submit"
-                className="w-full rounded-[1rem] bg-[#2f241d] px-5 py-4 text-base font-bold text-[#f8f1e7]"
+                disabled={isSaving}
+                className="w-full rounded-[1rem] bg-[#2f241d] px-5 py-4 text-base font-bold text-[#f8f1e7] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                판매자 등록 저장
+                {isSaving ? '저장 중...' : '판매자 등록 저장'}
               </button>
             </form>
           )}
+
+          {saveMessage && <p className="mt-4 text-sm font-medium text-[#8a6238]">{saveMessage}</p>}
 
           {sellerProfile && (
             <div className="mt-6 rounded-[1.6rem] border border-[#eadfce] bg-[#fffaf4] p-5">

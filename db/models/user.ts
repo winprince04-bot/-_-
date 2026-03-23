@@ -11,6 +11,16 @@ const PaymentMethodSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const SellerProfileSchema = new mongoose.Schema(
+  {
+    companyName: { type: String, default: '' },
+    companyAddress: { type: String, default: '' },
+    contactNumber: { type: String, default: '' },
+    description: { type: String, default: '' },
+  },
+  { _id: false }
+)
+
 const UserSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true, unique: true, trim: true },
@@ -19,6 +29,7 @@ const UserSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     phone: { type: String, required: true, unique: true, trim: true },
     paymentMethod: { type: PaymentMethodSchema, default: () => ({}) },
+    sellerProfile: { type: SellerProfileSchema, default: () => ({}) },
     profile_image_url: { type: String, default: '' },
     user_type: { type: String, default: 'user' },
   },
