@@ -1,16 +1,18 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import styled from 'styled-components'
-import SignUp from './Signup'
-import ForgetPassword from './ForgetPass'
-import { Gaitwise } from '@/public/svg'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import styled from 'styled-components'
+
+import { Gaitwise } from '@/public/svg'
+
+import ForgetPassword from './ForgetPass'
+import SignUp from './Signup'
 
 function AuthContent() {
-  const searchParams = useSearchParams() // URLのクエリパラメータを取得
-  const type = searchParams.get('type') // 'type' クエリパラメータを取得
+  const searchParams = useSearchParams()
+  const type = searchParams.get('type')
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -26,9 +28,9 @@ function AuthContent() {
     })
 
     if (res.ok) {
-      alert('ログイン成功')
+      alert('로그인에 성공했습니다.')
     } else {
-      alert('ログイン失敗')
+      alert('로그인에 실패했습니다.')
     }
   }
 
@@ -79,9 +81,9 @@ function AuthContent() {
           <LoginButton onClick={handleLogin}>Sign In</LoginButton>
 
           <Links>
-            <a href="/auth?type=forgetpass">Forgot password?</a>
+            <ActionButton href="/auth?type=forgetpass">비밀번호 재설정</ActionButton>
             <p>
-              Don’t have an account yet? <a href="/auth?type=sign-up">Sign up</a>
+              Don&apos;t have an account yet? <a href="/auth?type=sign-up">Sign up</a>
             </p>
           </Links>
         </LoginBox>
@@ -175,5 +177,24 @@ const Links = styled.div`
 
   a:hover {
     text-decoration: underline;
+  }
+`
+
+const ActionButton = styled.a`
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #d8c4a7;
+  border-radius: 10px;
+  background: #fff8ef;
+  color: #6d4d2e !important;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    background: white;
+    text-decoration: none !important;
   }
 `

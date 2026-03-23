@@ -410,6 +410,12 @@ export default function HeaderActions() {
                   >
                     아이디 이메일 로그인하기
                   </button>
+                  <Link
+                    href="/auth?type=forgetpass"
+                    className="flex w-full items-center justify-center rounded-[1rem] border border-[#ccb093] bg-[#fff8ef] px-5 py-4 text-base font-bold text-[#6d4d2e]"
+                  >
+                    비밀번호 재설정
+                  </Link>
                   {registeredUsers.length === 0 && (
                     <p className="text-sm text-[#8a775f]">아직 가입된 회원이 없어서 먼저 회원가입을 진행해야 합니다.</p>
                   )}
