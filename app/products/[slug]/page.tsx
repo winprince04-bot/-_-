@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 
 import ProductDetailClient from './ProductDetailClient'
 
-import { findProductBySlug, getRecommendedProducts } from '@/data/products'
+import { getProductBySlug, getRecommendedProducts } from '@/lib/productCatalog'
 
 type Props = {
   params: {
@@ -10,14 +10,14 @@ type Props = {
   }
 }
 
-export default function ProductDetailPage({ params }: Props) {
-  const product = findProductBySlug(params.slug)
+export default async function ProductDetailPage({ params }: Props) {
+  const product = await getProductBySlug(params.slug)
 
   if (!product) {
     notFound()
   }
 
-  const recommendedProducts = getRecommendedProducts(product)
+  const recommendedProducts = await getRecommendedProducts(product)
 
   return <ProductDetailClient product={product} recommendedProducts={recommendedProducts} />
 }

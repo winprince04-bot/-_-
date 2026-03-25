@@ -3,6 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/db/dbConnect'
 import User from '@/db/models/user'
 
+type PaymentMethodPayload = {
+  bank: string
+  cardNumber: string
+  expiry: string
+  cvc: string
+  address: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -14,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     await dbConnect()
 
-    const updatedUser = await User.findOneAndUpdate(
+    const updatedUser = (await User.findOneAndUpdate(
       { userId },
       {
         $set: {
@@ -28,7 +36,7 @@ export async function POST(request: NextRequest) {
         },
       },
       { new: true }
-    ).lean()
+    ).lean()) as { paymentMethod?: PaymentMethodPayload } | null
 
     if (!updatedUser) {
       return NextResponse.json({ message: '해당 회원을 찾을 수 없습니다.' }, { status: 404 })

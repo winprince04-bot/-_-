@@ -5,6 +5,7 @@ export type ProductImage = {
   label: string
   accent: string
   background: string
+  src?: string
 }
 
 export type Product = {
@@ -24,6 +25,15 @@ export type Product = {
   badge: string
   description: string
   images: ProductImage[]
+  isSellerProduct?: boolean
+  sellerUserId?: string
+  imageUrl?: string
+  sellerProfile?: {
+    companyName: string
+    companyAddress: string
+    contactNumber: string
+    description: string
+  } | null
 }
 
 export const categories: Array<{ key: CategoryKey; items: string[] }> = [

@@ -1,14 +1,49 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import HeaderActions from '@/components/HeaderActions'
-import { categories, flashSaleProducts, heroHighlights, popularProducts, type CategoryKey } from '@/data/products'
+import {
+  categories,
+  flashSaleProducts,
+  heroHighlights,
+  popularProducts,
+  type CategoryKey,
+  type Product,
+  type ProductImage,
+} from '@/data/products'
+
+const getCardMediaStyle = (image?: ProductImage) =>
+  image?.src
+    ? {
+        backgroundImage: `linear-gradient(135deg, rgba(36, 31, 26, 0.1), rgba(36, 31, 26, 0.04)), url(${image.src})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : { background: image?.background ?? 'linear-gradient(135deg, #8d6e63, #c8a27a)' }
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('의류')
+  const [sellerProducts, setSellerProducts] = useState<Product[]>([])
   const currentCategory = categories.find((category) => category.key === activeCategory)
+
+  useEffect(() => {
+    const loadSellerProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+
+        if (response.ok) {
+          setSellerProducts(data.products ?? [])
+        }
+      } catch {
+        setSellerProducts([])
+      }
+    }
+
+    loadSellerProducts()
+  }, [])
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#f6f1e8] px-4 py-6 text-[#241f1a] sm:px-6 lg:px-10">
@@ -163,7 +198,7 @@ export default function Home() {
                 <div className="absolute inset-x-6 top-0 h-24 rounded-b-full bg-[radial-gradient(circle,_rgba(212,172,114,0.18),_transparent_72%)]" />
                 <div
                   className="relative rounded-[1.35rem] px-4 py-6 text-center shadow-inner"
-                  style={{ background: product.images[0].background }}
+                  style={getCardMediaStyle(product.images[0])}
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-white/85">{product.badge}</p>
                   <p className="mt-10 text-lg font-black leading-snug text-white">{product.name}</p>
@@ -215,7 +250,7 @@ export default function Home() {
               >
                 <div
                   className="flex min-h-[150px] items-end rounded-[1.3rem] p-4"
-                  style={{ background: product.images[1].background }}
+                  style={getCardMediaStyle(product.images[1])}
                 >
                   <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
                     {product.subcategory}
@@ -237,6 +272,60 @@ export default function Home() {
               </Link>
             ))}
           </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-[#ddcfbf] bg-[linear-gradient(180deg,_rgba(255,254,251,0.98),_rgba(244,238,230,0.96))] p-5 shadow-[0_24px_70px_rgba(74,56,31,0.08)] sm:p-7">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[#8e6748]">Seller Market</p>
+              <h2 className="mt-3 text-3xl font-black text-[#241f1a] sm:text-4xl">판매자 등록 상품</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#756554]">
+                판매자가 직접 올린 상품을 메인에서 바로 확인할 수 있습니다. 등록한 실제 사진도 함께 노출됩니다.
+              </p>
+            </div>
+            <div className="rounded-full border border-[#e4d5c3] bg-white/80 px-5 py-3 text-sm font-semibold text-[#7a6147]">
+              등록 상품 {sellerProducts.length}개
+            </div>
+          </div>
+
+          {sellerProducts.length === 0 ? (
+            <div className="mt-7 rounded-[1.6rem] border border-dashed border-[#d8c6b3] bg-white/60 px-5 py-8 text-sm leading-7 text-[#786958]">
+              아직 판매자가 등록한 상품이 없습니다. 판매자 페이지에서 상품과 사진을 올리면 이 영역에 자동으로
+              노출됩니다.
+            </div>
+          ) : (
+            <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {sellerProducts.slice(0, 8).map((product) => (
+                <Link
+                  key={product.slug}
+                  href={`/products/${product.slug}`}
+                  className="group rounded-[1.6rem] border border-[#e8dbcd] bg-white/80 p-4 shadow-[0_14px_32px_rgba(84,62,34,0.07)] transition hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(84,62,34,0.12)]"
+                >
+                  <div
+                    className="flex min-h-[150px] items-end rounded-[1.3rem] p-4"
+                    style={getCardMediaStyle(product.images[0])}
+                  >
+                    <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                      {product.sellerProfile?.companyName ?? 'Seller'}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-[#b08b61]">{product.category}</p>
+                      <p className="mt-2 text-lg font-black text-[#251f19]">{product.name}</p>
+                    </div>
+                    <span className="rounded-full bg-[#f4eadf] px-3 py-1 text-xs font-bold text-[#8d6237]">
+                      {product.badge}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <p className="text-xl font-black text-[#241f1a]">{product.salePrice}</p>
+                    <p className="text-sm font-semibold text-[#916946]">{product.saleRate} 할인</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         <Link
